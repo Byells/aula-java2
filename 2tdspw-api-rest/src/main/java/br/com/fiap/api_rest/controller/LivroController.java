@@ -1,7 +1,6 @@
 package br.com.fiap.api_rest.controller;
 
 import br.com.fiap.api_rest.dto.LivroRequest;
-import br.com.fiap.api_rest.dto.LivroRequestDTO;
 import br.com.fiap.api_rest.dto.LivroResponse;
 import br.com.fiap.api_rest.model.Livro;
 import br.com.fiap.api_rest.repository.LivroRepository;
@@ -19,45 +18,41 @@ import java.util.Optional;
 @RequestMapping(value = "/livros")
 public class LivroController {
     @Autowired
-    private LivroService livroService;
-    @Autowired
     private LivroRepository livroRepository;
+    @Autowired
+    private LivroService livroService;
 
     // CREATE, READ, UPDATE, DELETE
     // POST, GET, PUT, DELETE
 
     @PostMapping
-    public ResponseEntity<Livro> createLivro(@RequestBody LivroRequestDTO livro) {
-        Livro livroSalvo = livroRepository.save(livroService.recordToLivro(livro));
+    public ResponseEntity<Livro> createLivro(@RequestBody LivroRequest livro) {
+        Livro livroSalvo = livroRepository.save(livroService.requestToLivro(livro));
         return new ResponseEntity<>(livroSalvo,HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<Livro>> readLivros() {
+    public ResponseEntity<List<LivroResponse>> readLivros() {
         List<Livro> livros = livroRepository.findAll();
-        return new ResponseEntity<>(livros,HttpStatus.OK);
+        List<LivroResponse> listaLivrosRes = livroService.livrosToResponse(livros);
+        return new ResponseEntity<>(listaLivrosRes, HttpStatus.OK);
     }
-
-    //@PathVariable localhost:8080/livros/1
-    //@RequestParams localhost:8080/livros/?id=1
 
     @GetMapping("/{id}")
-    public ResponseEntity<List<LivroResponse>> readLivro() {
-        List<Livro> livros = livroRepository.findAll();
-        List<LivroResponse> listaLivros = new ArrayList<>();
-        for (Livro livro : livros ) {
-            listaLivros.add(livroService.livroResponse(livro));
-        }
-        return new ResponseEntity<>(listaLivros, HttpStatus.OK);
+    public ResponseEntity<LivroResponse> readLivro(@PathVariable Long id) {
+        Optional<Livro> livro = livroRepository.findById(id);
+        if (livro.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(livroService.livroToResponse(livro.get()),HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Livro> updateLivro(@RequestBody Livro livro, @PathVariable Long id) {
-        Optional<Livro> LivroExistente = livroRepository.findById(id);
-        if(LivroExistente.isEmpty()){
-            return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
-        };
-        livro.setId(LivroExistente.get().getId());
+    @PutMapping
+    public ResponseEntity<Livro> updateLivro( @PathVariable Long id,@RequestBody LivroRequest livroReq) {
+        Optional<Livro> livroExistente = livroRepository.findById(id);
+
+        if (livroExistente.isEmpty()) return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+
+        Livro livro = livroService.requestToLivro(livroReq);
+        livro.setId(livroExistente.get().getId());
         Livro livroSalvo = livroRepository.save(livro);
         return new ResponseEntity<>(livroSalvo,HttpStatus.CREATED);
     }
