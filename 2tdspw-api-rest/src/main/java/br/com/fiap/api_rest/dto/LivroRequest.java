@@ -4,20 +4,35 @@ import br.com.fiap.api_rest.model.Categoria;
 import jakarta.validation.constraints.*;
 
 public class LivroRequest {
-    @NotBlank(message = "O titulo não pode estar vazio")
-    @Size(min = 3, max= 254, message = "O Titulo deve ter entre 3 e 150 caracteres")
+    @NotBlank(message = "O título não pode ser nulo ou vazio")
+    @Size(min = 3, max = 254, message = "O título deve ter entre 3 e 254 caracteres")
     private String titulo;
-
-    @NotBlank(message = "O titulo não pode estar vazio")
-    @Size(min = 3, max= 254, message = "O Titulo deve ter entre 3 e 150 caracteres")
+    @NotBlank(message = "O nome do autor não pode ser nulo ou vazio")
+    @Size(min = 3, max = 150, message = "O nome do autor deve ter entre 3 e 150 caracteres")
     private String autor;
-    @Min(value= 1, message= "O preço deve ser no mínimo 1")
+    @Min(value = 1, message = "O preço deve ser no mínimo 1")
     @Max(value = 99, message = "O preço deve ser no máximo 99")
     private int preco;
     @NotNull(message = "A categoria é obrigatória")
     private Categoria categoria;
-    @Pattern(regexp = "^970\\d{7}$|^970\\d{10}$", message = "O ISBN deve começar com 970 e ter 10 ou 13 dígitos")
+    @Pattern(regexp = "^970\\d{10}$|^970\\d{7}$", message = "O ISBN deve ter 10 OU 13 dígitos e iniciar por 970")
     private String isbn;
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public String getAutor() {
+        return autor;
+    }
+
+    public void setAutor(String autor) {
+        this.autor = autor;
+    }
 
     public int getPreco() {
         return preco;
@@ -41,17 +56,5 @@ public class LivroRequest {
 
     public void setIsbn(String isbn) {
         this.isbn = isbn;
-    }
-
-    public String getTitulo() { return titulo; }
-
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
-
-    public String getAutor() { return autor; }
-
-    public void setAutor(String autor) {
-        this.autor = autor;
     }
 }

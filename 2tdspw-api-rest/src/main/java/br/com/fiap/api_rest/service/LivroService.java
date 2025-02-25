@@ -4,40 +4,51 @@ import br.com.fiap.api_rest.dto.LivroRequest;
 import br.com.fiap.api_rest.dto.LivroRequestDTO;
 import br.com.fiap.api_rest.dto.LivroResponse;
 import br.com.fiap.api_rest.model.Livro;
+import br.com.fiap.api_rest.repository.LivroRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Service
 public class LivroService {
-    public Livro requestToLivro(LivroRequest LivroRequest){
-        Livro livro = new Livro();
-        livro.setAutor(LivroRequest.getAutor());
-        livro.setTitulo(LivroRequest.getTitulo());
-        livro.setPreco(LivroRequest.getPreco());
-        livro.setCategoria(LivroRequest.getCategoria());
-        livro.setIsbn(LivroRequest.getIsbn());
-        return livro;
+    @Autowired
+    LivroRepository livroRepository;
 
-    }
-
-    public Livro recordToLivro(LivroRequestDTO LivroRecord){
+    public Livro requestToLivro(LivroRequest livroRequest) {
         Livro livro = new Livro();
-        livro.setAutor(LivroRecord.autor());
-        livro.setTitulo(LivroRecord.titulo());
+        livro.setAutor(livroRequest.getAutor());
+        livro.setTitulo(livroRequest.getTitulo());
+        livro.setPreco(livroRequest.getPreco());
+        livro.setCategoria(livroRequest.getCategoria());
+        livro.setIsbn(livroRequest.getIsbn());
         return livro;
     }
 
-    public LivroResponse livroToResponse(Livro livro){
-        return new LivroResponse(livro.getAutor() + " - " + livro.getAutor());
-
+    public Livro recordToLivro(LivroRequestDTO livroRecord) {
+        Livro livro = new Livro();
+        livro.setTitulo(livroRecord.titulo());
+        livro.setAutor(livroRecord.autor());
+        return livro;
     }
 
-    public List<LivroResponse> livrosToResponse(List<Livro> livros){
+    public LivroResponse livroToResponse(Livro livro) {
+        return new LivroResponse(livro.getAutor() + " - " + livro.getTitulo());
+    }
+
+    public List<LivroResponse> livrosToResponse(List<Livro> livros) {
         List<LivroResponse> listaLivros = new ArrayList<>();
-        for(Livro livro:  livros){
+        for (Livro livro : livros) {
             listaLivros.add(livroToResponse(livro));
         }
         return listaLivros;
     }
 
+    public Page<LivroResponse> findAll(Pageable pageable) {
+        return livroRepository.findAll(pageable).map(this::livroToResponse);
+    }
 }
